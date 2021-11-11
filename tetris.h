@@ -1,3 +1,4 @@
+#include<stdio.h>
 #include <unistd.h>
 #include <signal.h>
 #include <time.h>
@@ -5,10 +6,15 @@
 #include <ncurses.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+
 
 #define WIDTH 10
 #define HEIGHT 20
 #define BLOCK_SIZE 4
+#define NAME_LEN 100
 
 #define QUIT 1
 #define KEYB_SPACE 2
@@ -17,6 +23,10 @@
 #define KEYB_RIGHT 5
 #define KEYB_UP 6
 #define NOTHING -1
+
+#define START_PLAY 1
+#define PRINT_RANK 2
+#define EXIT_GAME 3
 
 struct sigaction act;
 struct sigaction old_act;
@@ -87,6 +97,8 @@ int blocks[6][BLOCK_SIZE][BLOCK_SIZE] = {
 	}
 };
 
+
+int get_menu();
 int control_key();
 void process_key(int key);
 

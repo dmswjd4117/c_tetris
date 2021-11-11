@@ -1,27 +1,87 @@
-/*
-curses
-https://tldp.org/HOWTO/NCURSES-Programming-HOWTO/index.html
-https://docs.python.org/ko/3.8/library/curses.html
-*/
-
 #include "tetris.h"
- 
+#include "redBlackTree.h"
+
 int main(){
-	
- 
 	int exit = 0;
 	initscr();  
 	noecho();
 	curs_set(FALSE);
 	keypad(stdscr, TRUE); 
 	
-    init();
-	play();
- 
-	sleep(100);
-	endwin();
- 
+	RBTNode* rankList = NULL;	
+	init_rankList(&rankList);
+	
+	while(!exit){
+		clear();
+		switch(get_menu()){
+			case START_PLAY:
+				init();
+				play();
+				break;
+			case PRINT_RANK:
+				print_rank(rankList);
+				break;
+			case EXIT_GAME:
+				exit = 1;
+				break;
+		}
+	}
+
+
+	endwin(); 
 	return 0;
+}
+
+
+int get_menu(){
+	printw("menu\n");
+	printw("1. play game\n");
+	printw("2. show rank\n");
+	printw("3. exit game\n");
+	return wgetch(stdscr)-'0';
+}
+ 
+void print_rank(RBTNode* rankList){
+	clear();
+	RBT_print(rankList);
+	wgetch(stdscr);
+}
+
+void init_rankList(RBTNode** rankList){
+	FILE* fp = fopen("rank.txt", "r");
+	if(fp == NULL){
+		fp = fopen("rank.txt", "w");
+		if(fp == NULL){
+			printw("rank file create error!");
+			exit(0);
+		}
+		fprintf(fp, "0\n");
+		return;
+	}
+	
+	// init nil node
+	element* nil_elem = (element*)  malloc(sizeof(element));
+	Nil = RBT_createNode(*nil_elem);
+	Nil->color = BLACK;
+
+	int n;
+	fscanf(fp, "%d", &n);
+	char name[NAME_LEN];
+	int score;
+	for(int i=0; i<n ;i++){
+		fscanf(fp, "%s %d", name, &score);
+		element* newElem = (element*) malloc(sizeof(element));
+		newElem->name = strdup(name);
+		newElem->score = score;
+		RBT_insertNode(rankList, RBT_createNode(*newElem));
+	}
+	
+	fclose(fp);
+}
+
+
+void save_rankList(){
+	
 }
 
 void process_key(int key){
@@ -148,8 +208,6 @@ void initBlock(Block* block){
 
 
 void play(){
-	
-	// sigaction 
 	act.sa_handler = downBlock;
 	sigaction(SIGALRM, &act, &old_act);
 	
@@ -174,6 +232,7 @@ void play(){
 		
 	}while(!gm.game_over);
 	
+	clear();
 	move(HEIGHT+10, 0);
 	printw("GAME OVER!");
 
@@ -397,19 +456,4 @@ void paintBox(int y, int x, int height, int width){
 		y = y -1;
 	}
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
