@@ -3,9 +3,9 @@
 
 int main(){
 	int exit = 0;
+	
 	initscr();  
 	noecho();
-	curs_set(FALSE);
 	keypad(stdscr, TRUE); 
 	
 	RBTNode* rankList = NULL;	
@@ -121,9 +121,8 @@ void process_key(int key){
 	
 	if(flag){
 		paintBoard();
-		paintBlock(cur_block, ' ', 0, cur_block.x, cur_block.y);
 		paintShawdow(cur_block);
-		refresh();
+		paintBlock(cur_block, ' ', 0, cur_block.x, cur_block.y);
 	}
 	
 }
@@ -223,13 +222,7 @@ void play(){
 		
 		int cmd = control_key();
 		process_key(cmd);
-		
-		
-		paintBoard();
-		paintBlock(cur_block,' ', 0, cur_block.x, cur_block.y);
-		paintShawdow(cur_block);
-		refresh();
-		
+	
 	}while(!gm.game_over);
 	
 	clear();
@@ -252,27 +245,51 @@ void copyBlock(Block* dst_block, Block* cpy_block){
 }
 
 int removeBottom(){
-	for(int i=1; i<WIDTH; i++){
-		
+	for(int r=HEIGHT; r>=1; r--){
+		int flag = 1;
+		for(int i=1; i<=WIDTH; i++){
+			 if(gm.board[r][i] == 0){
+				 flag = 0;
+				 break;
+			 }
+		}
+		if(!flag){
+			continue;
+		}
+		// r번째 행 깨트림..
+		for(int i=r; i>=2; i--){
+			for(int j=1; j<=WIDTH; j++){
+				gm.board[i][j] = gm.board[i-1][j];
+			}
+		}
+		for(int i=1; i<=WIDTH; i++){
+			gm.board[1][i] = 0;
+		}
+		r -= 1;
 	}
 }
 
 void downBlock(int signal){
 	if(isin(cur_block, 1, 0, 0)){
 		cur_block.x += 1;	
+		//
+		paintBoard();
+		paintShawdow(cur_block);
+		paintBlock(cur_block, ' ', 0, cur_block.x, cur_block.y);
+		// 
 	}else{
 		if(cur_block.x == 1){
 			gm.game_over = 1;
 			return;
 		}
-		
+
+		fixBlock(cur_block);
 		removeBottom();
-		fixBlock(cur_block);		
+		paintBoard();
 		
 		copyBlock(&cur_block, &next_block[0]);
 		copyBlock(&next_block[0], &next_block[1]);
 		initBlock(&next_block[1]);
-		
 		paintBlocks();
 	}
 	
@@ -280,6 +297,7 @@ void downBlock(int signal){
 }
 
 void fixBlock(Block block){
+	
 	int x = block.x;
 	int y = block.y;
  
@@ -373,7 +391,7 @@ void removeBlock(int x, int y){
 	}
 }
 
-
+ 
 
 int isin(Block block , int px, int py, int rotate){
 	int tx = 0;
