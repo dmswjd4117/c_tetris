@@ -124,7 +124,7 @@ int isin(Block block , int px, int py, int rotate);
 void rotate();
 void paintBlock(Block block, char pattern, int is_shawdow, int x, int y);
 void removeBlock(int x, int y);
-int removeBottom();
+int removeLine();
 
  
 

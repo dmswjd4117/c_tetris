@@ -1,5 +1,6 @@
 #include "tetris.h"
 #include "redBlackTree.h"
+ 
 
 int main(){
 	int exit = 0;
@@ -8,8 +9,9 @@ int main(){
 	noecho();
 	keypad(stdscr, TRUE); 
 	
-	RBTNode* rankList = NULL;	
+	rankList = NULL;	
 	init_rankList(&rankList);
+ 
 	
 	while(!exit){
 		clear();
@@ -19,7 +21,7 @@ int main(){
 				play();
 				break;
 			case PRINT_RANK:
-				print_rank(rankList);
+				print_rank();
 				break;
 			case EXIT_GAME:
 				exit = 1;
@@ -33,15 +35,14 @@ int main(){
 }
 
 
-int get_menu(){
-	printw("menu\n");
+int get_menu(){	printw("menu\n");
 	printw("1. play game\n");
 	printw("2. show rank\n");
 	printw("3. exit game\n");
 	return wgetch(stdscr)-'0';
 }
  
-void print_rank(RBTNode* rankList){
+void print_rank(){
 	clear();
 	RBT_print(rankList);
 	wgetch(stdscr);
@@ -81,8 +82,27 @@ void init_rankList(RBTNode** rankList){
 
 
 void save_rankList(){
+    char name[NAME_LEN];
+
+    clear();
+    echo();
+    printw("name: ");
+    scanw("%s", name);
+    noecho();
 	
-}
+	
+    if (name[0] == '\0') {
+        return;
+    }
+	
+	element* newElem = (element*) malloc(sizeof(element));
+	newElem->name = strdup(name);
+	newElem->score = gm.score;
+ 
+	RBT_insertNode(&rankList, RBT_createNode(*newElem));
+	
+	print_rank();
+} 
 
 void process_key(int key){
 	int flag = 0;
@@ -225,11 +245,14 @@ void play(){
 	
 	}while(!gm.game_over);
 	
-	clear();
-	move(HEIGHT+10, 0);
-	printw("GAME OVER!");
-
+ 
+	alarm(0);
+	getch();
 	refresh();
+	getch();
+	
+	save_rankList();
+
 }
 
 void copyBlock(Block* dst_block, Block* cpy_block){
@@ -244,7 +267,7 @@ void copyBlock(Block* dst_block, Block* cpy_block){
 	}
 }
 
-int removeBottom(){
+int removeLine(){
 	for(int r=HEIGHT; r>=1; r--){
 		int flag = 1;
 		for(int i=1; i<=WIDTH; i++){
@@ -256,7 +279,7 @@ int removeBottom(){
 		if(!flag){
 			continue;
 		}
-		// r번째 행 깨트림..
+
 		for(int i=r; i>=2; i--){
 			for(int j=1; j<=WIDTH; j++){
 				gm.board[i][j] = gm.board[i-1][j];
@@ -284,7 +307,7 @@ void downBlock(int signal){
 		}
 
 		fixBlock(cur_block);
-		removeBottom();
+		removeLine();
 		paintBoard();
 		
 		copyBlock(&cur_block, &next_block[0]);

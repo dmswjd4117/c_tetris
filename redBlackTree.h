@@ -6,13 +6,16 @@
 #include <string.h>
 #include <ncurses.h>
 
-typedef  struct _element{
+typedef  struct _element element;
+typedef struct _RBTNode RBTNode;
+	
+struct _element{
 	int index;
 	int score;
 	char* name;
-} element;
+} ;
 
-typedef struct _RBTNode
+struct _RBTNode
 {
     struct _RBTNode* parent;
     struct _RBTNode* left;
@@ -22,13 +25,16 @@ typedef struct _RBTNode
 
     element data;
 
-} RBTNode;
+} ;
 
 RBTNode* Nil;
+RBTNode* rankList;
 
 void init_rankList(RBTNode** rankList);
-void print_rank(RBTNode* rankList);
+void print_rank();
 void RBT_print(RBTNode* node);
+void save_rankList();
+
 
 RBTNode* RBT_createNode(element data);
 
